@@ -4,13 +4,13 @@
       <h3 class="text-center mb-1">INICIAR SESIÓN</h3>
       <el-form ref="formRef" :model="form" :rules="formRules">
         <el-form-item label="NOMBRE DE USUARIO:" prop="email">
-          <el-input type="email" v-model="form.email"></el-input>
+          <el-input v-model="form.email" type="email" />
         </el-form-item>
         <el-form-item label="CONTRASEÑA:" prop="password">
-          <el-input v-model="form.password" show-password></el-input>
+          <el-input v-model="form.password" show-password />
         </el-form-item>
         <el-form-item>
-          <el-button type="success" @click="handleSubmit" class="block">
+          <el-button type="success" class="block" @click="handleSubmit">
             INICIAR SESIÓN
           </el-button>
         </el-form-item>
@@ -40,8 +40,8 @@ const formRules = {
 };
 
 export default {
-  layout: "admin",
   name: "IndexPage",
+  layout: "admin",
   data() {
     return {
       form,

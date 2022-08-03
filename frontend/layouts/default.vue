@@ -2,7 +2,7 @@
   <el-container style="height: 100vh">
     <el-header>
       <el-dropdown>
-        <i class="el-icon-setting"></i>
+        <i class="el-icon-setting" />
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item @click="handleLogout">
             CERRAR SESIÓN
@@ -14,15 +14,15 @@
       <el-aside>
         <el-menu style="height: 100%" @select="handleSelect">
           <el-menu-item index="/">
-            <i class="el-icon-menu"></i>
+            <i class="el-icon-menu" />
             <span> INICIO </span>
           </el-menu-item>
           <el-menu-item index="/create">
-            <i class="el-icon-menu"></i>
+            <i class="el-icon-menu" />
             <span> CREACIÓN </span>
           </el-menu-item>
           <el-menu-item index="/update">
-            <i class="el-icon-menu"></i>
+            <i class="el-icon-menu" />
             <span> MODIFICACIÓN </span>
           </el-menu-item>
         </el-menu>
@@ -36,6 +36,7 @@
 
 <script>
 export default {
+  name: "DefaultTemplate",
   methods: {
     async handleLogout() {
       await this.$auth.logout();
