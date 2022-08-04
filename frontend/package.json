@@ -12,6 +12,7 @@
   "dependencies": {
     "@nuxtjs/auth-next": "5.0.0-1648802546.c9880dc",
     "@nuxtjs/axios": "^5.13.6",
+    "@truffle/contract": "^4.5.19",
     "core-js": "^3.19.3",
     "element-ui": "^2.15.6",
     "g": "^2.0.1",

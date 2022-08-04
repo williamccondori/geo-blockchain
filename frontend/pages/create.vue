@@ -64,9 +64,6 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-draw/dist/leaflet.draw.js";
 
-import { v4 as uuidv4 } from "uuid";
-import { mapActions } from "vuex";
-
 const form = {
   name: "",
   lastName: "",
@@ -90,13 +87,16 @@ export default {
       temporalLayers: [],
       createVisible: false,
       editableLayer: null,
+      // Bloackchain
+      account: null,
+      registersContract: {},
     };
   },
   mounted() {
     this.initMap();
+    this.initDApp();
   },
   methods: {
-    ...mapActions(["createRegistry"]),
     initMap() {
       const map = L.map("map").setView([-0.23, -78.5], 13);
       // Add base map.
@@ -152,6 +152,27 @@ export default {
 
       this.map = map;
     },
+    async initDApp() {
+      if (window.ethereum) {
+        // Accessing the provider through the ethereum object.
+        const web3Provider = window.ethereum;
+        const accounts = await web3Provider.request({
+          method: "eth_requestAccounts",
+        });
+        this.account = accounts[0];
+        // Load contract.
+        const contracts = {};
+        const response = await fetch("RegistersContract.json");
+        // eslint-disable-next-line no-undef
+        contracts.RegistersContract = TruffleContract(await response.json());
+        contracts.RegistersContract.setProvider(web3Provider);
+        this.registersContract = await contracts.RegistersContract.deployed();
+      } else {
+        this.$message.error(
+          "NO SE HA ENCONTRADO LA EXTENSIÓN METAMASK, INSTALALA PARA PODER USAR LA APLICACIÓN"
+        );
+      }
+    },
     handleCreate(leafletId) {
       this.leafletIdSelected = leafletId;
       this.createVisible = true;
@@ -161,7 +182,7 @@ export default {
       this.createVisible = false;
     },
     handleSubmit() {
-      this.$refs.formRef.validate((valid) => {
+      this.$refs.formRef.validate(async (valid) => {
         if (valid) {
           try {
             const layers = this.editableLayer.getLayers();
@@ -188,19 +209,22 @@ export default {
             };
 
             // Create registry.
-            const registry = {
-              id: uuidv4(),
-              name: this.form.name,
-              lastName: this.form.lastName,
-              contractNumber: this.form.contractNumber,
-              geojson: geojson,
-            };
-            this.createRegistry(registry);
-
+            const result = await this.registersContract.createRegister(
+              this.form.name,
+              this.form.lastName,
+              this.form.contractNumber,
+              JSON.stringify(geojson),
+              this.$auth.user.email,
+              {
+                from: this.account,
+              }
+            );
+            console.log(result);
             this.resetFields();
             this.createVisible = false;
             this.$message.success("LA OPERACIÓN SE HA COMPLETADO EXITOSAMENTE");
-          } catch (_) {
+          } catch (e) {
+            console.error(e);
             this.$message.error(
               "SE HA ENCONTRADO ERRORES AL REALIZAR LA OPERACIÓN"
             );

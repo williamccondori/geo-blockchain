@@ -14,11 +14,19 @@ import "leaflet/dist/leaflet.css";
 
 export default {
   name: "IndexPage",
-  mounted() {
-    this.initMap();
+  data() {
+    return {
+      // Bloackchain
+      account: null,
+      registersContract: {},
+    };
+  },
+  async mounted() {
+    await this.initDApp();
+    await this.initMap();
   },
   methods: {
-    initMap() {
+    async initMap() {
       const map = L.map("map").setView([-0.23, -78.5], 13);
       // Add base map.
       map.addLayer(
@@ -26,6 +34,38 @@ export default {
           attribution: "&copy; WILLIAM CONDORI QUISPE",
         })
       );
+
+      console.log(this.registersContract);
+      const rCounter = await this.registersContract.registerCounter();
+      console.log(rCounter);
+
+      const registerCounter = rCounter.toNumber();
+      for (let i = 1; i <= registerCounter; i++) {
+        const register = await this.registersContract.registers(i);
+        console.log(register);
+      }
+      console.log(registerCounter);
+    },
+    async initDApp() {
+      if (window.ethereum) {
+        // Accessing the provider through the ethereum object.
+        const web3Provider = window.ethereum;
+        const accounts = await web3Provider.request({
+          method: "eth_requestAccounts",
+        });
+        this.account = accounts[0];
+        // Load contract.
+        const contracts = {};
+        const response = await fetch("RegistersContract.json");
+        // eslint-disable-next-line no-undef
+        contracts.RegistersContract = TruffleContract(await response.json());
+        contracts.RegistersContract.setProvider(web3Provider);
+        this.registersContract = await contracts.RegistersContract.deployed();
+      } else {
+        this.$message.error(
+          "NO SE HA ENCONTRADO LA EXTENSIÓN METAMASK, INSTALALA PARA PODER USAR LA APLICACIÓN"
+        );
+      }
     },
   },
 };

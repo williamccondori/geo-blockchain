@@ -1,5 +1,5 @@
 export const state = () => ({
-  registries: [],
+  registersContract: null,
 });
 
 export const mutations = {

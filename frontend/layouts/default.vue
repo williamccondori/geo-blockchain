@@ -40,7 +40,6 @@ export default {
   methods: {
     async handleLogout() {
       await this.$auth.logout();
-      this.$router.push({ path: "/login" });
     },
     handleSelect(item) {
       this.$router.push({
