@@ -92,19 +92,82 @@ export default {
       registersContract: {},
     };
   },
-  mounted() {
-    this.initMap();
-    this.initDApp();
+  async mounted() {
+    if (!this.map) {
+      await this.initMap();
+    }
+    await this.initDApp();
   },
   methods: {
-    initMap() {
-      const map = L.map("map").setView([-0.23, -78.5], 13);
+    async initMap() {
+      const map = L.map("map").setView([-12.5811764, -69.1565787], 12);
       // Add base map.
-      map.addLayer(
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: "&copy; WILLIAM CONDORI QUISPE",
-        })
+      const baseLayer = L.tileLayer(
+        "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
       );
+      map.addLayer(baseLayer);
+
+      const baseLayers = {
+        "STADIA.OSMBRIGHT": baseLayer,
+        "STADIA.ALIDADESMOOTHDARK": L.tileLayer(
+          "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+        ),
+        "STADIA.ALIDADESMOOTH": L.tileLayer(
+          "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
+        ),
+        "GOOGLE.MAPS": L.tileLayer(
+          "https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}"
+        ),
+        "GOOGLE.HYBRID": L.tileLayer(
+          "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+        ),
+        "GOOGLE.ROADS": L.tileLayer(
+          "https://mt1.google.com/vt/lyrs=h&x={x}&y={y}&z={z}"
+        ),
+      };
+
+      // Add regions layer.
+      let response = await fetch("Departamentos.geojson");
+      let responseGeojson = await response.json();
+      const regionLayer = L.geoJSON(responseGeojson, {
+        style: {
+          color: "lightblue",
+          weight: 1,
+          fillColor: "lightblue",
+          fillOpacity: 0.05,
+        },
+      });
+
+      // Add district layer.
+      response = await fetch("Provincias.geojson");
+      responseGeojson = await response.json();
+      const provinceLayer = L.geoJSON(responseGeojson, {
+        style: {
+          color: "green",
+          weight: 1,
+          fillColor: "green",
+          fillOpacity: 0.05,
+        },
+      });
+
+      // Add district layer.
+      response = await fetch("Distritos.geojson");
+      responseGeojson = await response.json();
+      const districtLayer = L.geoJSON(responseGeojson, {
+        style: {
+          color: "orange",
+          weight: 1,
+          fillColor: "orange",
+          fillOpacity: 0.05,
+        },
+      });
+
+      const overlayMaps = {
+        DEPARTAMENTOS: regionLayer,
+        PROVINCIAS: provinceLayer,
+        DISTRITOS: districtLayer,
+      };
+      L.control.layers(baseLayers, overlayMaps).addTo(map);
 
       this.editableLayer = new L.FeatureGroup();
       map.addLayer(this.editableLayer);
@@ -121,8 +184,8 @@ export default {
             showArea: true,
             metric: true,
             shapeOptions: {
-              color: "blue",
-              weight: 1,
+              color: "purple",
+              weight: 3,
             },
           },
         },
@@ -162,7 +225,7 @@ export default {
         this.account = accounts[0];
         // Load contract.
         const contracts = {};
-        const response = await fetch("RegistersContract.json");
+        const response = await fetch("/RegistersContract.json");
         // eslint-disable-next-line no-undef
         contracts.RegistersContract = TruffleContract(await response.json());
         contracts.RegistersContract.setProvider(web3Provider);

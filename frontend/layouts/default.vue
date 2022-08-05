@@ -1,18 +1,12 @@
 <template>
   <el-container style="height: 100vh">
-    <el-header>
-      <el-dropdown>
-        <i class="el-icon-setting" />
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item @click="handleLogout">
-            CERRAR SESIÓN
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown>
+    <el-header class="header">
+      <img src="~/assets/images/logo.png" alt="logo" class="logo" />
+      <el-button type="danger" @click="handleLogout">CERRAR SESIÓN</el-button>
     </el-header>
     <el-container>
       <el-aside>
-        <el-menu style="height: 100%" @select="handleSelect">
+        <el-menu style="height: 100%" default-active="/" @select="handleSelect">
           <el-menu-item index="/">
             <i class="el-icon-menu" />
             <span> INICIO </span>
@@ -40,6 +34,7 @@ export default {
   methods: {
     async handleLogout() {
       await this.$auth.logout();
+      location.reload();
     },
     handleSelect(item) {
       this.$router.push({
@@ -50,4 +45,20 @@ export default {
 };
 </script>
 
-<style></style>
+<style scoped>
+.header {
+  background-color: #212121;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%),
+    0 1px 5px 0 rgb(0 0 0 / 20%);
+  z-index: 999;
+}
+.logo {
+  width: 10rem;
+  /** white */
+  filter: invert(0.5);
+}
+</style>

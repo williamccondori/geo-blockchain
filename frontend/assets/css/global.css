@@ -32,3 +32,21 @@
   margin-left: -0.25rem !important;
   margin-top: -0.25rem !important;
 }
+
+.table{
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 1rem;
+  background-color: transparent;
+}
+
+.table thead th {
+  vertical-align: bottom;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table td, .table th {
+  padding: .3rem;
+  vertical-align: top;
+  border-top: 1px solid #dee2e6;
+}

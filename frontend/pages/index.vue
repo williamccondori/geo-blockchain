@@ -1,7 +1,15 @@
 <template>
   <section>
-    <h1 class="mb-1">SISTEMA INTEGRADO DE CATASTRO</h1>
-    <el-divider />
+    <div class="text-center">
+      <img src="~/assets/images/logo.png" alt="logo" class="logo" />
+    </div>
+    <el-alert
+      title="¡BIENVENIDO!"
+      type="success"
+      description="CON GEO BLOCKCHAIN, PUEDES CREAR Y MODIFICAR TU INFORMACIÓN GEOESPACIAL EN LÍNEA."
+      show-icon
+      class="mb-1"
+    />
     <el-card>
       <div id="map" />
     </el-card>
@@ -11,40 +19,139 @@
 <script>
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import moment from "moment";
 
 export default {
   name: "IndexPage",
   data() {
     return {
-      // Bloackchain
+      // Blockchain
       account: null,
       registersContract: {},
     };
   },
   async mounted() {
     await this.initDApp();
-    await this.initMap();
+    if (!this.map) {
+      await this.initMap();
+    }
   },
   methods: {
     async initMap() {
-      const map = L.map("map").setView([-0.23, -78.5], 13);
+      const map = L.map("map").setView([-12.5811764, -69.1565787], 12);
       // Add base map.
-      map.addLayer(
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: "&copy; WILLIAM CONDORI QUISPE",
-        })
+      const baseLayer = L.tileLayer(
+        "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
       );
+      map.addLayer(baseLayer);
 
-      console.log(this.registersContract);
+      const baseLayers = {
+        "STADIA.OSMBRIGHT": baseLayer,
+        "STADIA.ALIDADESMOOTHDARK": L.tileLayer(
+          "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+        ),
+        "STADIA.ALIDADESMOOTH": L.tileLayer(
+          "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
+        ),
+        "GOOGLE.MAPS": L.tileLayer(
+          "https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}"
+        ),
+        "GOOGLE.HYBRID": L.tileLayer(
+          "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+        ),
+        "GOOGLE.ROADS": L.tileLayer(
+          "https://mt1.google.com/vt/lyrs=h&x={x}&y={y}&z={z}"
+        ),
+      };
+
+      // Add regions layer.
+      let response = await fetch("Departamentos.geojson");
+      let responseGeojson = await response.json();
+      const regionLayer = L.geoJSON(responseGeojson, {
+        style: {
+          color: "lightblue",
+          weight: 1,
+          fillColor: "lightblue",
+          fillOpacity: 0.05,
+        },
+      });
+
+      // Add district layer.
+      response = await fetch("Provincias.geojson");
+      responseGeojson = await response.json();
+      const provinceLayer = L.geoJSON(responseGeojson, {
+        style: {
+          color: "green",
+          weight: 1,
+          fillColor: "green",
+          fillOpacity: 0.05,
+        },
+      });
+
+      // Add district layer.
+      response = await fetch("Distritos.geojson");
+      responseGeojson = await response.json();
+      const districtLayer = L.geoJSON(responseGeojson, {
+        style: {
+          color: "orange",
+          weight: 1,
+          fillColor: "orange",
+          fillOpacity: 0.05,
+        },
+      });
+
+      const overlayMaps = {
+        DEPARTAMENTOS: regionLayer,
+        PROVINCIAS: provinceLayer,
+        DISTRITOS: districtLayer,
+      };
+      L.control.layers(baseLayers, overlayMaps).addTo(map);
+
       const rCounter = await this.registersContract.registerCounter();
-      console.log(rCounter);
-
       const registerCounter = rCounter.toNumber();
       for (let i = 1; i <= registerCounter; i++) {
         const register = await this.registersContract.registers(i);
-        console.log(register);
+        let geojson = register[4];
+        geojson = JSON.parse(geojson);
+        const geojsonLayer = L.geoJSON(geojson, {
+          style: {
+            color: "purple",
+            weight: 3,
+          },
+          zIndex: 100,
+        });
+        geojsonLayer.bindPopup(
+          `
+          <table class="table">
+            <tbody>
+              <tr>
+                <th scope="row">N° DE CONTRATO</th>
+                <td>${register[3]}</td>
+              </tr>
+              <tr>
+                <th scope="row">NOMBRE</th>
+                <td>${register[1]}</td>
+              </tr>
+              <tr>
+                <th scope="row">APPELLIDO</th>
+                <td>${register[2]}</td>
+              </tr>
+              <tr>
+                <th scope="row">FECHA DE CREACIÓN:</th>
+                <td>${moment(new Date(register[5] * 1000)).format(
+                  "DD/MM/YYYY hh:mm"
+                )}</td>
+              </tr>
+              <tr>
+                <th scope="row">MODIFICADO POR:</th>
+                <td>${register[6]}</td>
+              </tr>
+            </tbody>
+          </table>
+          `
+        );
+        map.addLayer(geojsonLayer);
       }
-      console.log(registerCounter);
     },
     async initDApp() {
       if (window.ethereum) {
@@ -56,7 +163,7 @@ export default {
         this.account = accounts[0];
         // Load contract.
         const contracts = {};
-        const response = await fetch("RegistersContract.json");
+        const response = await fetch("/RegistersContract.json");
         // eslint-disable-next-line no-undef
         contracts.RegistersContract = TruffleContract(await response.json());
         contracts.RegistersContract.setProvider(web3Provider);
@@ -70,3 +177,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.logo {
+  width: 20rem;
+}
+</style>

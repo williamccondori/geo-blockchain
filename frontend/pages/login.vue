@@ -1,7 +1,7 @@
 <template>
   <div class="login-page">
     <el-card>
-      <h3 class="text-center mb-1">INICIAR SESIÓN</h3>
+      <img src="~/assets/images/logo.png" alt="logo" class="logo" />
       <el-form ref="formRef" :model="form" :rules="formRules">
         <el-form-item label="NOMBRE DE USUARIO:" prop="email">
           <el-input v-model="form.email" type="email" />
@@ -71,5 +71,8 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.logo {
+  width: 20rem;
 }
 </style>

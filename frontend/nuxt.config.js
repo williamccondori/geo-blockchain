@@ -4,9 +4,9 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: "frontend",
+    title: "GEO-BLOCKCHAIN",
     htmlAttrs: {
-      lang: "en",
+      lang: "es",
     },
     meta: [
       { charset: "utf-8" },
@@ -14,7 +14,13 @@ export default {
       { hid: "description", name: "description", content: "" },
       { name: "format-detection", content: "telephone=no" },
     ],
-    link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
+    link: [
+      {
+        rel: "icon",
+        type: "image/x-icon",
+        href: "/favicon.png",
+      },
+    ],
     script: [
       {
         src: "https://cdn.jsdelivr.net/npm/truffle-contract@4.0.31/dist/truffle-contract.min.js",
